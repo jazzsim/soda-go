@@ -33,7 +33,8 @@ func (c *Contents) retrieveContents(collector *colly.Collector) {
 
 		// ignore header links
 		if parent.Text() == "" && e.Text != "../"{
-			c.getContents(e.Text)	
+			link := e.Attr("href");
+			c.getContents(link)	
 		}
 	})
 }
