@@ -36,7 +36,7 @@ func scrape(c * gin.Context) {
 		fmt.Println("Visiting", r.URL.String())
 	})
 
-	contents := Contents{}
+	contents := Contents{Folders: []string{}, Files: []Files{}}
 	contents.retrieveContents(collector)
 
 	collector.OnScraped(func(r *colly.Response) {
