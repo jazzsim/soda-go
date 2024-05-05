@@ -1,8 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"encoding/base64"
+	"fmt"
 	"net/http"
 	"net/url"
 
@@ -17,11 +17,15 @@ type HttpServer struct {
 }
 
 func main() {
+	gin.SetMode(gin.ReleaseMode)
+
 	router := gin.Default()
+	router.ForwardedByClientIP = true
+	router.SetTrustedProxies([]string{"127.0.0.1"})
 	router.Use(CORSMiddleware())
 	router.POST("/scrape", scrape)
 
-	router.Run("localhost:8080")
+	router.Run("0.0.0.0:8080")
 }
 
 func CORSMiddleware() gin.HandlerFunc {
@@ -60,7 +64,6 @@ func scrape(c *gin.Context) {
 
 	credentialsNeeded := server.Username != "" && server.Password != ""
 	if credentialsNeeded {
-		fmt.Println("in credentials")
 		auth := "Basic " + base64.StdEncoding.EncodeToString([]byte(server.Username+":"+server.Password))
 		collector.OnRequest(func(r *colly.Request) {
 			r.Headers.Set("Authorization", auth)
