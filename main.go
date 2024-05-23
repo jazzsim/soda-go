@@ -1,10 +1,13 @@
 package main
 
 import (
+	"bytes"
 	"encoding/base64"
 	"fmt"
+	"log"
 	"net/http"
 	"net/url"
+	"os/exec"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gocolly/colly"
@@ -24,6 +27,7 @@ func main() {
 	router.SetTrustedProxies([]string{"127.0.0.1"})
 	router.Use(CORSMiddleware())
 	router.POST("/scrape", scrape)
+	router.GET("/thumbnail", getThumbnail)
 
 	router.Run("0.0.0.0:8080")
 }
@@ -75,7 +79,7 @@ func scrape(c *gin.Context) {
 
 	collector.OnScraped(func(r *colly.Response) {
 		fmt.Println("Finished", r.Request.URL)
-		c.IndentedJSON(http.StatusOK, contents)
+		c.JSON(http.StatusOK, contents)
 	})
 
 	collector.Visit(server.Url)
@@ -89,4 +93,26 @@ func (s *HttpServer) verifyUrl() (*url.URL, error) {
 		return nil, err
 	}
 	return parseUrl, nil
+}
+
+func getThumbnail(c *gin.Context) {
+	videoUrl := c.Query("url")
+
+	if videoUrl == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Missing video URL"})		
+	}
+
+	cmd := exec.Command("ffmpeg", "-i", videoUrl, "-ss", "00:01:00", "-vf", "scale=300:190", "-frames:v", "1", "-f", "image2pipe", "pipe:")
+
+	var out bytes.Buffer
+	cmd.Stdout = &out
+
+	err := cmd.Run()
+	if err != nil {
+		log.Fatalf("Error generating thumbnail: %v", err)
+	}
+
+	data := Thumbnail{Thumbnail: base64.StdEncoding.EncodeToString(out.Bytes())}
+	
+	c.JSON(http.StatusOK, data)
 }

@@ -17,9 +17,13 @@ type Files struct {
 	Filename string `json:"filename"`
 }
 
+type Thumbnail struct {
+	Thumbnail string `json:"thumbnail"`
+}
+
 var mediaTypeExtensions = map[string][]string{
 	"Image":    {"jpg", "jpeg", "png", "webp", "gif", "heif"},
-	"Video":    {"mp4", "mkv", "avi", "mov", "wmv", "flv", "webm", "mov", "qt"},
+	"Video":    {"mp4", "mkv", "avi", "mov", "wmv", "flv", "webm", "mov", "qt", "m4v", "ogg"},
 	"Audio":    {"mp3", "wav", "aiff", "aa", "aax", "flac", "m4a"},
 	"Document": {"pdf", "txt", "rtf", "xls", "ppt", "doc", "docx", "xlsx"},
 	"Others":   {},
